@@ -1,4 +1,4 @@
-﻿namespace Lavabird.Amplitude.Api;
+﻿namespace Lavabird.Amplitude;
 
 /// <summary>
 /// Represents the identity of a user or device for an event. Enforces that at least one must be specified.

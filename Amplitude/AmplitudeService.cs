@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -11,6 +12,7 @@ using Lavabird.Amplitude.Api;
 
 namespace Lavabird.Amplitude;
 
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")] // Public class library
 public class AmplitudeService : IAsyncDisposable
 {
 	/// <summary>
@@ -462,7 +464,7 @@ public class AmplitudeService : IAsyncDisposable
 	/// Saves any data that has not yet been sent to the API. This is called periodically automatically, and in the
 	/// event of a graceful shutdown.
 	/// </summary>
-	private void SaveQueue()
+	public void SaveQueue()
 	{
 		if (persistenceStream == null) return;
 

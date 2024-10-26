@@ -9,25 +9,20 @@ public static class ObjectExtensions
 	/// </summary>
 	public static Dictionary<string, object>? ToDictionary<T>(this T obj)
 	{
-		if (obj != null)
+		if (obj == null) return null;
+		if (obj is Dictionary<string, object> dict) return dict;
+		
+		var dictionary = new Dictionary<string, object>();
+
+		foreach (var property in obj.GetType().GetRuntimeProperties())
 		{
-			var dictionary = new Dictionary<string, object>();
-
-			foreach (var property in obj.GetType().GetRuntimeProperties())
+			var val = property.GetValue(obj, null);
+			if (val != null)
 			{
-				var val = property.GetValue(obj, null);
-				if (val != null)
-				{
-					dictionary[property.Name] = val;
-				}
-			}
-
-			if (dictionary.Count != 0)
-			{
-				return dictionary;
+				dictionary[property.Name] = val;
 			}
 		}
 
-		return null;
+		return dictionary.Count != 0 ? dictionary : null;
 	}
 }

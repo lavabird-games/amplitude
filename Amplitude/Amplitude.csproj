@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+		<TargetFrameworks>net8.0;net6;net472;</TargetFrameworks>
+        <LangVersion>11</LangVersion>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Lavabird.Amplitude</RootNamespace>
+		<AssemblyName>Lavabird.Amplitude</AssemblyName>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Lavabird.Amplitude</PackageId>
+		<Version>1.0.0</Version>
+        <Authors>Andy Savage</Authors>
+        <Company>LAVABIRD</Company>
+        <Product>Amplitude API</Product>
+        <PackageDescription>.Net library for interacting with Amplitude's API</PackageDescription>
+        <Copyright>Copyright © LAVABIRD Ltd 2024</Copyright>
+        <Summary>.Net library for interacting with Amplitude's API</Summary>
+        <NeutralLanguage>en</NeutralLanguage>
+        <Title>Amplitude</Title>
+		<RepositoryUrl>https://github.com/orgs/lavabird-games/amplitude</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+    </PropertyGroup>
+	<!-- Conditional references for net472 -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+	    <Reference Include="System.Net.Http" />
+        <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    </ItemGroup>
+	<ItemGroup>
+		<Content Include="..\LICENSE" Pack="true" PackagePath="\" />
+		<Content Include="..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+	<ItemGroup>
+		<InternalsVisibleTo Include="$(AssemblyName).Tests" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,44 @@
+name: Publish NuGet
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  build-publish:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    permissions:
+      contents: read  # For actions/checkout
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Setup .Net environment
+      - name: Setup .Net
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      # Grab dependencies from Nuget
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: Amplitude
+
+      # Build the library
+      - name: Build
+        run: dotnet build --no-restore
+        working-directory: Amplitude
+
+      # TODO: Build and validate the unit tests
+
+      # Publish the package to Nuget
+      - name: Publish to Nuget
+        run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{ secrets.NUGET_PUBLISH_API_KEY }}

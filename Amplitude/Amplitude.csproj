@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-		<TargetFrameworks>net8.0;net6;net472;</TargetFrameworks>
+		<TargetFrameworks>net8.0;net6.0;net472;</TargetFrameworks>
         <LangVersion>11</LangVersion>
         <Nullable>enable</Nullable>
         <RootNamespace>Lavabird.Amplitude</RootNamespace>
 		<AssemblyName>Lavabird.Amplitude</AssemblyName>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Lavabird.Amplitude</PackageId>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
         <Authors>Andy Savage</Authors>
         <Company>LAVABIRD</Company>
         <Product>Amplitude API</Product>
@@ -24,6 +24,10 @@
 	<ItemGroup Condition="'$(TargetFramework)' == 'net472'">
 	    <Reference Include="System.Net.Http" />
         <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    </ItemGroup>
+	<!-- Conditional references for net6.0 -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+        <PackageReference Include="System.Text.Json" Version="8.0.5" /><!-- Need higher than 6 built in for polymorphic support -->
     </ItemGroup>
 	<ItemGroup>
 		<Content Include="..\LICENSE" Pack="true" PackagePath="\" />

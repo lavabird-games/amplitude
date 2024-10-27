@@ -25,6 +25,7 @@ public class AmplitudeEvent : AmplitudeBase
 	/// property values in an array and date values are transformed into string values.
 	/// </summary>
 	[JsonPropertyName("event_properties")]
+	[JsonInclude] // Private setter
 	public Dictionary<string, object> Properties { get; private set; } = new();
 	
 	/// <summary>
@@ -38,6 +39,7 @@ public class AmplitudeEvent : AmplitudeBase
 	/// Sequentially counter for each event to preserve event order when events are generated with the same timestamp.
 	/// </summary>
 	[JsonPropertyName("event_id")]
+	[JsonInclude] // Private setter
 	public long EventId { get; private set; }
 	
 	/// <summary>
@@ -54,6 +56,7 @@ public class AmplitudeEvent : AmplitudeBase
 	/// InsertId will be automatically generated for each event on creation.
 	/// </summary>
 	[JsonPropertyName("insert_id")]
+	[JsonInclude] // Private setter
 	public string? InsertId { get; private set; }
 
 	/// <summary>
@@ -98,5 +101,11 @@ public class AmplitudeEvent : AmplitudeBase
 				}
 			}
 		}
+	}
+	
+	[JsonConstructor]
+	public AmplitudeEvent()
+	{
+		// For deserialization
 	}
 }

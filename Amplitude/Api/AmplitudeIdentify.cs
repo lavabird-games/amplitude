@@ -10,7 +10,8 @@ public class AmplitudeIdentify : AmplitudeBase
 	/// array and date values are transformed into string values.
 	/// </summary>
 	[JsonPropertyName("user_properties")]
-	public Dictionary<string, object> Properties { get; } = new();
+	[JsonInclude]
+	public Dictionary<string, object> Properties { get; private set; } = new();
 
 	public AmplitudeIdentify(AmplitudeIdentity identity, Dictionary<string, object>? userProperties = null) : base(identity)
 	{
@@ -22,5 +23,11 @@ public class AmplitudeIdentify : AmplitudeBase
 				Properties[property.Key] = property.Value;
 			}
 		}
+	}
+	
+	[JsonConstructor]
+	private AmplitudeIdentify()
+	{
+		// For deserialization
 	}
 }

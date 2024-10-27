@@ -49,11 +49,6 @@ public class AmplitudeService : IAsyncDisposable
 	private readonly Stream? persistenceStream;
 	
 	/// <summary>
-	/// The settings used to serialize entities to JSON for persistence.
-	/// </summary>
-	private readonly JsonSerializerOptions? persistenceSerializerOptions;
-	
-	/// <summary>
 	/// Optional logger for this service. If not specified, Debug.WriteLine is used.
 	/// </summary>
 	private readonly Action<LogLevel, string>? logger;
@@ -151,10 +146,6 @@ public class AmplitudeService : IAsyncDisposable
 		if (persistenceStream != null)
 		{
 			this.persistenceStream = persistenceStream;
-			persistenceSerializerOptions = new JsonSerializerOptions()
-			{
-				DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-			};
 			RestoreFromStream();
 
 			// We can have a stream but configure without periodic saving still
@@ -481,7 +472,7 @@ public class AmplitudeService : IAsyncDisposable
 					string persistedData;
 					lock (queueLock)
 					{
-						persistedData = JsonSerializer.Serialize(apiQueue, persistenceSerializerOptions);
+						persistedData = JsonSerializer.Serialize(apiQueue, CreatePersistenceSerializerOptions(true));
 					}
 
 					// Reset us back to the start and truncate content (in case new data is shorter)
@@ -502,6 +493,28 @@ public class AmplitudeService : IAsyncDisposable
 			logger?.Invoke(LogLevel.Error, $"Failed to persist events: {e}");
 		}
 	}
+
+	/// <summary>
+	/// Creates the set of options to use when serializing data to the persistence stream.
+	/// </summary>
+	private JsonSerializerOptions CreatePersistenceSerializerOptions(bool writer)
+	{
+		var options = new JsonSerializerOptions()
+		{
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+			IncludeFields = true,
+			IgnoreReadOnlyFields = false,
+			IgnoreReadOnlyProperties = false,
+		};
+		
+		if (!writer)
+		{ 
+			// Need way of mapping back to basic types from untyped JSON
+			options.Converters.Add(new ObjectNativeTypeConverter());
+		}
+		
+		return options;
+	}
 	
 	/// <summary>
 	/// Handles when the background timer indicates that we should save the event queue to the persistence stream.
@@ -509,6 +522,21 @@ public class AmplitudeService : IAsyncDisposable
 	private void OnSaveQueueTimer(object? sender, ElapsedEventArgs args)
 	{
 		SaveQueue();
+	}
+	
+	/// <summary>
+	/// Gets the amount of events that are currently pending to be sent to the Amplitude API. Due to the async
+	/// nature of the service, some of these events could already be in-flight at the time of querying.
+	/// </summary>
+	public int QueueSize
+	{
+		get
+		{
+			lock (queueLock)
+			{
+				return apiQueue.Count;
+			}
+		}
 	}
 
 	/// <summary>
@@ -527,8 +555,9 @@ public class AmplitudeService : IAsyncDisposable
 				
 				if (!string.IsNullOrEmpty(persistedData))
 				{
-					var data = JsonSerializer.Deserialize<List<AmplitudeBase>>(persistedData, persistenceSerializerOptions);
-					if (data != null && data.Any())
+					var data = JsonSerializer.Deserialize<List<AmplitudeBase>>(
+						persistedData, CreatePersistenceSerializerOptions(false));
+					if (data != null && data.Count != 0)
 					{ 
 						lock (queueLock)
 						{

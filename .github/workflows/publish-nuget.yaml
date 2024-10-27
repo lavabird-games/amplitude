@@ -34,7 +34,7 @@ jobs:
 
       # Build the library
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore --configuration Release
         working-directory: Amplitude
 
       # TODO: Build and validate the unit tests

@@ -16,7 +16,7 @@
         <Summary>.Net library for interacting with Amplitude's API</Summary>
         <NeutralLanguage>en</NeutralLanguage>
         <Title>Amplitude</Title>
-		<RepositoryUrl>https://github.com/orgs/lavabird-games/amplitude</RepositoryUrl>
+		<RepositoryUrl>https://github.com/lavabird-games/amplitude</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>

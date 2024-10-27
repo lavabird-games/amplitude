@@ -7,7 +7,7 @@
 		<AssemblyName>Lavabird.Amplitude</AssemblyName>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Lavabird.Amplitude</PackageId>
-		<Version>1.0.1</Version>
+		<Version>1.0.2</Version>
         <Authors>Andy Savage</Authors>
         <Company>LAVABIRD</Company>
         <Product>Amplitude API</Product>

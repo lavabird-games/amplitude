@@ -70,6 +70,7 @@
     <ItemGroup>
         <Compile Include="AmplitudeServiceTests.cs" />
         <Compile Include="Api\AmplitudeApiTests.cs" />
+        <Compile Include="EndToEndTests.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
     </ItemGroup>
     <ItemGroup>

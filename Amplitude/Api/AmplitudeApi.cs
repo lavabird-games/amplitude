@@ -79,7 +79,7 @@ internal class AmplitudeApi : IAmplitudeApi
 		
 		var boundary = "----" + DateTime.Now.Ticks;
 		using var content = new MultipartFormDataContent(boundary);
-		
+
 		content.Add(new StringContent(apiKey, Encoding.UTF8, "text/plain"), "api_key");
 		content.Add(new StringContent(json, Encoding.UTF8, "application/json"), "identification");
 
@@ -127,14 +127,13 @@ internal class AmplitudeApi : IAmplitudeApi
 		};
 
 		using var ms = new MemoryStream();
-		
 		SerializeJsonIntoStream(payload, ms);
-
-		using var httpContent = new StreamContent(ms);
+		
+		using var content = new StreamContent(ms);
 		using var request = new HttpRequestMessage(HttpMethod.Post, $"https://{GetAmplitudeHost(euResidency)}/2/httpapi");
 		
-		httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-		request.Content = httpContent;
+		content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+		request.Content = content;
 
 		try
 		{
@@ -166,13 +165,18 @@ internal class AmplitudeApi : IAmplitudeApi
 			// 400
 			case HttpStatusCode.BadRequest:
 				// Error message detailing what was wrong with the request will be in body
-				var responseJson = await response.Content.ReadAsStringAsync();
+				var responseContent = await response.Content.ReadAsStringAsync();
 				// We want to catch API key messages during integration, so we do some extra work to catch them
 				try
 				{
-					// Bad API key response example JSON
+					// Response can come as a JSON payload from the events API, or simple a string from the others
+					if (responseContent == "invalid_api_key")
+					{
+						return AmplitudeApiResult.InvalidApiKey;
+					}
+					// Try parse response as JSON and extract error message instead
 					// { "code":400, "error":"Invalid API key: 1234567890" }
-					var payload = JsonSerializer.Deserialize<Dictionary<string, object>>(responseJson);
+					var payload = JsonSerializer.Deserialize<Dictionary<string, object>>(responseContent);
 					if(payload != null && payload.TryGetValue("error", out var errorMessage) && 
 					   errorMessage is JsonElement { ValueKind: JsonValueKind.String } jsonValue)
 					{
@@ -188,7 +192,7 @@ internal class AmplitudeApi : IAmplitudeApi
 					// We can swallow the exception as we're logging the entire API response anyway.
 				}
 				// If we get here, there was something wrong with the data, but its not our API key
-				logger?.Invoke(LogLevel.Error, $"Amplitude API returned 400 (Bad Request): {responseJson}");
+				logger?.Invoke(LogLevel.Error, $"Amplitude API returned 400 (Bad Request): {responseContent}");
 				return AmplitudeApiResult.BadData;
 
 			// 413
@@ -244,8 +248,9 @@ internal class AmplitudeApi : IAmplitudeApi
 
 		using var sw = new StreamWriter(stream, new UTF8Encoding(false), 1024, true);
 		JsonSerializer.Serialize(stream, value, jsonSerializerOptions);
-
-		// Must flush after else we'll get an empty stream
+		
+		// Must flush and move back to start so the HTTP client can read from there
 		sw.Flush();
+		stream.Seek(0, SeekOrigin.Begin);
 	}
 }

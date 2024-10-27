@@ -14,9 +14,11 @@ namespace Lavabird.Amplitude.Tests.Api;
 public class AmplitudeApiTests
 {
 	/// <summary>
-	/// Key to use for testing the Amplitude API. This key is not actually valid.
+	/// Dummy key to use for fake API requests. This key is not actually valid.
 	/// </summary>
-	private const string TestApiKey = "testApiKey";
+	private const string DummyApiKey = "testApiKey";
+	
+	
 	
 	/// <summary>
 	/// Tests the standard case of identifying a user.
@@ -32,10 +34,10 @@ public class AmplitudeApiTests
 			new AmplitudeIdentity("testUserId", "testDeviceId"),
 			new Dictionary<string, object>
 			{
-				{ "TestUserProperty", "Test Value" }
+				{ "TestProperty", "Test Value" }
 			});
 		
-		var api = new AmplitudeApi(TestApiKey, httpMessageHandler: mockMessageHandler.Object);
+		var api = new AmplitudeApi(DummyApiKey, httpMessageHandler: mockMessageHandler.Object);
 		var result = api.Identify(identify, CancellationToken.None);
 		
 		Assert.Equal(AmplitudeApiResult.Success, result.Result);
@@ -51,7 +53,7 @@ public class AmplitudeApiTests
 			HttpStatusCode.OK,
 			"{\"code\":200, \"server_upload_time\":1396381378123 }");
 		
-		var api = new AmplitudeApi(TestApiKey, httpMessageHandler: mockMessageHandler.Object);
+		var api = new AmplitudeApi(DummyApiKey, httpMessageHandler: mockMessageHandler.Object);
 		var result = api.SendEvents(new[] { CreateTestEvent() }, CancellationToken.None);
 		
 		Assert.Equal(AmplitudeApiResult.Success, result.Result);
@@ -67,7 +69,7 @@ public class AmplitudeApiTests
 			HttpStatusCode.OK,
 			"{\"code\":200, \"server_upload_time\":1396381378123 }");
 		
-		var api = new AmplitudeApi(TestApiKey, httpMessageHandler: mockMessageHandler.Object);
+		var api = new AmplitudeApi(DummyApiKey, httpMessageHandler: mockMessageHandler.Object);
 		var result = api.SendEvents(new[]
 		{
 			CreateTestEvent(),
@@ -79,7 +81,7 @@ public class AmplitudeApiTests
 	}
 	
 	/// <summary>
-	/// Tests the we correctly process invalid API key messages from the Amplitude API.
+	/// Tests that we correctly process invalid API key messages from the Amplitude API.
 	/// </summary>
 	[Fact]
 	public void SendEvents_InvalidApiKeyResponse_ReturnsInvalidApiKey()
@@ -88,7 +90,7 @@ public class AmplitudeApiTests
 			HttpStatusCode.BadRequest,
 			"{\"code\":400, \"error\":\"Invalid API key\" }");
 		
-		var api = new AmplitudeApi(TestApiKey, httpMessageHandler: mockMessageHandler.Object);
+		var api = new AmplitudeApi(DummyApiKey, httpMessageHandler: mockMessageHandler.Object);
 		var result = api.SendEvents(new[] { CreateTestEvent() }, CancellationToken.None);
 		
 		Assert.Equal(AmplitudeApiResult.InvalidApiKey, result.Result);
@@ -102,7 +104,7 @@ public class AmplitudeApiTests
 	{
 		var identity = new AmplitudeIdentity("testUserId", "testDeviceId");
 		
-		return new AmplitudeEvent(identity, "Test Event", new Dictionary<string, object>
+		return new AmplitudeEvent(identity, "Test.Event", new Dictionary<string, object>
 		{
 			{ "TestProperty", "Test Value" }
 		});

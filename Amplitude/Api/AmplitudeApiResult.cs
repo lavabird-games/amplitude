@@ -39,4 +39,9 @@ public enum AmplitudeApiResult
 	/// A network error occurred while trying to reach the Amplitude API.
 	/// </summary>
 	NetworkError,
+	
+	/// <summary>
+	/// An error occured which we won't be able to recover on. Don't attempt to send future events.
+	/// </summary>
+	UnrecoverableError,
 }

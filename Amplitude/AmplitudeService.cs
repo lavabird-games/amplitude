@@ -139,9 +139,9 @@ public class AmplitudeService : IAsyncDisposable
 		}
 		
 		this.settings = settings ?? new AmplitudeServiceSettings();
-		this.logger ??= (level, message) => { Debug.WriteLine($"Amplitude: [{level}] {message}"); };
+		this.logger = logger ?? ((level, message) => { Debug.WriteLine($"Amplitude: [{level}] {message}"); });
 
-		this.api = api ?? new AmplitudeApi(apiKey, logger, this.settings.UseEuResidency);
+		this.api = api ?? new AmplitudeApi(apiKey, this.logger, this.settings.UseEuResidency);
 		
 		if (persistenceStream != null)
 		{
@@ -426,6 +426,14 @@ public class AmplitudeService : IAsyncDisposable
 							// We treat replayable server errors in the same way as a throttle. Retry in a bit
 							backOff = true;
 							break;
+						
+						case AmplitudeApiResult.UnrecoverableError:
+							// Something happened that means we won't be able to send any events this session.
+							// All we can do is queue and hope for the best.
+							logger?.Invoke(LogLevel.Error,
+								$"Amplitude API returned unrecoverable response. Further API calls will not be sent");
+							disableQueueDispatch = true;
+							return false;
 					}
 				}
 

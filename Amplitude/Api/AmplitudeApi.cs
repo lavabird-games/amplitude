@@ -92,9 +92,9 @@ internal class AmplitudeApi : IAmplitudeApi
 			// Fortunately the response codes at least match (mostly) the v2 event API
 			return await ResultFromAmplitudeHttpResponse(response);
 		}
-		catch (HttpRequestException)
+		catch (HttpRequestException ex)
 		{
-			return AmplitudeApiResult.NetworkError;
+			return ResultFromHttpRequestException(ex);
 		}
 	}
 
@@ -143,9 +143,9 @@ internal class AmplitudeApi : IAmplitudeApi
 					
 			return await ResultFromAmplitudeHttpResponse(response);
 		}
-		catch (HttpRequestException)
+		catch (HttpRequestException ex)
 		{
-			return AmplitudeApiResult.NetworkError;
+			return ResultFromHttpRequestException(ex);
 		}
 	}
 
@@ -226,6 +226,21 @@ internal class AmplitudeApi : IAmplitudeApi
 				// If we are getting something not defined in the docs then treat as a server error (can retry)
 				return AmplitudeApiResult.ServerError;
 		}
+	}
+
+	/// <summary>
+	/// Returns a result matching the network exception that occurred.
+	/// </summary>
+	private AmplitudeApiResult ResultFromHttpRequestException(HttpRequestException ex)
+	{
+		// Most web exceptions we can retry, but an authentication error will never succeed
+		if (ex.InnerException is WebException { Status: WebExceptionStatus.TrustFailure } wex)
+		{
+			logger?.Invoke(LogLevel.Error, $"Trust failure connecting to Amplitude API: {wex}");
+			return AmplitudeApiResult.UnrecoverableError;
+		}
+			
+		return AmplitudeApiResult.NetworkError;
 	}
 	
 	/// <summary>

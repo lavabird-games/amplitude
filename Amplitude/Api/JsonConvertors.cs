@@ -41,6 +41,9 @@ public class ObjectNativeTypeConverter : JsonConverter<object>
 			JsonTokenType.String when reader.TryGetDateTime(out DateTime datetime) => datetime,
 			JsonTokenType.String => reader.GetString()!,
 			
+			JsonTokenType.StartArray => JsonSerializer.Deserialize<object[]>(ref reader, options),
+			JsonTokenType.StartObject => JsonSerializer.Deserialize<Dictionary<string, object>>(ref reader, options),
+			
 			_ => reader.GetString()
 		};
 	}

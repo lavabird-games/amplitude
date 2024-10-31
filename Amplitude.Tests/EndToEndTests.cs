@@ -45,7 +45,9 @@ public class EndToEndTests
 		var identity = new AmplitudeIdentity("testUserId", "testDeviceId");
 		var testEvent = new AmplitudeEvent(identity, "Test.Event", new Dictionary<string, object>
 		{
-			{ "TestProperty", "Test Value" }
+			{ "TestProperty", "Test Value" },
+			{ "TestObject", new { Inner = 100 } },
+			{ "TestArray", new [] { 1, 2, 3, 4} },
 		});
 		var api = new AmplitudeApi(TestApiKey, null, true);
 		

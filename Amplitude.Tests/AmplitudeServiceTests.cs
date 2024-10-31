@@ -153,7 +153,8 @@ public class AmplitudeServiceTests
 	[Fact]
 	public async void Event_Persistence_SavedEventMatchesLoadedEvent()
 	{
-		var eventData = new { Foo = "Bar", Fizz = 10 };
+		// Test with complex object with sub arrays and sub objects
+		var eventData = new { Foo = "Bar", Fizz = 10, Arr = new[] { 30, 40 }, SubObject = new { InnerVal = 100, } };
 		
 		// Simulate throttling so events are forced to stay in the API queue unsent
 		var mockApi = new Mock<IAmplitudeApi>();
@@ -192,6 +193,9 @@ public class AmplitudeServiceTests
 		Assert.Equal(ev.DeviceId, TestIdentity.DeviceId);
 		Assert.Equal(ev.Properties["Foo"], eventData.Foo);
 		Assert.Equal(ev.Properties["Fizz"], (long)eventData.Fizz); // JSON deserializes numbers to longs
+		Assert.True(ev.Properties["Arr"] is Array { Length: 2 } arr && (long)arr.GetValue(0) == eventData.Arr[0]);
+		Assert.True(ev.Properties["SubObject"] is Dictionary<string, object> dict && 
+		            (long)dict["InnerVal"] == eventData.SubObject.InnerVal);
 	}
 	
 	/// <summary>
